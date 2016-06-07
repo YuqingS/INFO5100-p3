@@ -99,7 +99,6 @@
 
 	var suffix = ["-F", "-M"];
 		
-
 	// name search input
 	var namesInput = $('#name_search');
 	namesInput.typeahead();
@@ -148,9 +147,9 @@
 			nametagColorMap[tag] = color;
 
 			currentList.push({"nametag":tag, "color": color} );
-			if(babyNamesByYear[tag]["max_rate"] > maxRate) {
-				updateYScale();	
-			}
+			
+			updateYScale();	
+			updateXScale();
 			
 			updateGraph();
 			
@@ -171,12 +170,12 @@
 						.append("svg")
 						// .attr("width", yeargraph_width)
       					// .attr("height", yeargraph_height)
-            			.attr("viewBox", "0 0 1000 600")
-  						.attr("preserveAspectRatio", "xMidYMin meet")
+            			.attr("viewBox", "0 0 "+yeargraph_width+" "+yeargraph_height)
+  						.attr("preserveAspectRatio", "xMidYMid meet")
             			;
     //preserveAspectRatio="xMinYMin meet"
     var xScale = d3.scale.linear()
-					.domain([1900, 2014])
+					.domain([1880, 2014])
 					.range([padding*2, (yeargraph_width-padding)]);
 	
 	var xAxis = d3.svg.axis()
@@ -280,7 +279,7 @@
 		if(_.isUndefined(startYear) || _.isUndefined(endYear))
 		{	
 			if(currentList.length == 0) {
-				startYear = 1900;
+				startYear = 1880;
 				endYear = 2014;
 			}
 			else {
@@ -291,8 +290,8 @@
 
 			currentList.forEach(function(nameData){
 				nameyeardata = babyNamesByYear[nameData.nametag];
+				console.log(startYear, endYear, nameyeardata.min_year, nameyeardata.max_year );
 				if(_.isUndefined(startYear) || startYear > nameyeardata.min_year) {
-					console.log(nameyeardata.min_year);
 					startYear = nameyeardata.min_year ;
 				}
 				if(_.isUndefined(endYear) || endYear < nameyeardata.max_year) {
@@ -301,7 +300,7 @@
 			});
 		}
 		
-		startYear = (startYear < 1900)? 1900 : startYear;
+		startYear = (startYear < 1880)? 1880 : startYear;
 		xScale.domain([startYear, endYear]);
 		yeargraph_svg.select(".x.axis")
 			.transition()
@@ -334,7 +333,7 @@
 			var gender = nametag.split("-")[1];
 			addNameToAreaChart(name, gender.replace("-",""), colorsMap[nametagColorMap[nametag]], nameData.startY, nameData.endY);
 		});	
-		console.log(nameData);
+		
 		var g = yeargraph_svg.append("g")
 				.attr("class","yeargraph")
 				;
@@ -396,8 +395,7 @@
 		minYear = xScale.domain()[0];
 		maxYear = xScale.domain[1];
 
-
-		d3.selectAll("g.celebrities").remove();
+		d3.selectAll(".yeargraph").remove();
 		currentList.forEach(function(nameData){
 			var name = nameData.nametag.split("-")[0];
 			var gender = nameData.nametag.split("-")[1];
@@ -414,8 +412,6 @@
 		});
 
 		showCelebrityBlock(celebritiesList);
-		console.log(celebritiesList);
-
 	};		
 
 	/*append x-axis*/
@@ -455,7 +451,7 @@
 		var nameYeardataList = [];
 
 		// TODO: CHANGE TO MINYEAR & MAXYEAR
-		var startY = _.isUndefined(startYear)? 1900:startYear;
+		var startY = _.isUndefined(startYear)? 1880:startYear;
 		var endY = _.isUndefined(endYear)? 2014:endYear;
 
 		for(var year in nameYeardata) {
